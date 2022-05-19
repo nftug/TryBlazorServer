@@ -1,0 +1,95 @@
+﻿@page "/fetchtodo"
+
+<PageTitle>Todo List</PageTitle>
+
+@using MediatR
+@inject IMediator Mediator
+@using Application.Todos
+@using Infrastructure.Todos
+@using Pagination.EntityFrameworkCore.Extensions
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
+@using System.Security.Claims
+
+<h1>Todo List</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (todoItems == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>@(todoItems.TotalItems) items found.</p>
+
+    <table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Begin</th>
+            <th>Due</th>
+            <th>State</th>
+            <th>Created At</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in todoItems.Results)
+            {
+                <tr>
+                    <td>@item.Title</td>
+                    <td>@item.BeginDateTime</td>
+                    <td>@item.DueDateTime</td>
+                    <td>@item.State</td>
+                    <td>@item.CreatedDateTime.ToShortDateString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+    <ul class="pagination justify-content-center">
+        <li class="page-item @(todoItems.PreviousPage == null ? "disabled" : null)">
+            <a class="page-link" href="/fetchtodo?page=@todoItems.PreviousPage" ria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        @{
+            foreach (int i in Enumerable.Range(1, todoItems.TotalPages))
+            {
+                <li class="page-item @(todoItems.CurrentPage == i ? "active" : null)">
+                    <a class="page-link" href="/fetchtodo?page=@i">@i</a>
+                </li>
+            }
+        }
+        <li class="page-item @(todoItems.NextPage == null ? "disabled" : null)">
+            <a class="page-link" href="/fetchtodo?page=@todoItems.NextPage" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+}
+
+@code {
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public string Page { get; set; } = null!;
+
+    private string _userId =>
+    httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
+    ?? string.Empty;
+
+    private Pagination<TodoResultDTO>? todoItems = null;
+
+    private TodoQueryParameter _param = new TodoQueryParameter { Limit = 1 };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        int page;
+        Int32.TryParse(Page, out page);
+        _param.Page = page > 0 ? page : 1;
+
+        // await Task.Delay(1000);
+        todoItems = await Mediator.Send(new List.Query(_param, _userId));
+    }
+}
