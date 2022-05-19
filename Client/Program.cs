@@ -50,6 +50,7 @@ builder.Services.AddTransient<TodoQuerySearchService>();
 builder.Services.AddTransient<CommentQuerySearchService>();
 
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddScoped<CountIncrementService>();
 
 var app = builder.Build();
 
