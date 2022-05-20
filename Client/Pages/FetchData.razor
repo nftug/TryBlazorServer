@@ -3,14 +3,16 @@
 <PageTitle>Weather forecast</PageTitle>
 
 @using Client.Data
+@using System.Threading
 @inject WeatherForecastService ForecastService
+@implements IDisposable
 
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from a service.</p>
 
 <AuthorizeView>
-    <p>@context.User.Identity?.Name!</p>
+    <p>Hello, @context.User.Identity?.Name!</p>
 </AuthorizeView>
 
 @if (forecasts == null)
@@ -44,9 +46,25 @@ else
 
 @code {
     private WeatherForecast[]? forecasts;
+    private Timer? _timer;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+        _timer = new Timer((_) => GetForecast(), null, 0, 1000);
+    }
+
+    private void GetForecast()
+    {
+        InvokeAsync(async () =>
+        {
+            forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose()
+    {
+        if (_timer != null)
+            _timer.Dispose();
     }
 }

@@ -8,7 +8,6 @@
 @using Pagination.EntityFrameworkCore.Extensions
 @using Microsoft.AspNetCore.Http
 @using System.Security.Claims
-
 @inject IMediator Mediator
 @inject IHttpContextAccessor httpContextAccessor
 
@@ -90,7 +89,6 @@ else
         Int32.TryParse(Page, out page);
         _param.Page = page > 0 ? page : 1;
 
-        // await Task.Delay(1000);
         todoItems = await Mediator.Send(new List.Query(_param, _userId));
     }
 }
