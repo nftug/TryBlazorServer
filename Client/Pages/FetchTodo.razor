@@ -11,30 +11,46 @@
 <h1>Todo List</h1>
 
 <AuthorizeView Context="authContext">
-    <EditForm EditContext="@EditContext" OnValidSubmit="@OnValidSubmit" id="form">
+    <EditForm EditContext="@EditContext" OnValidSubmit="@OnValidSubmit">
         <DataAnnotationsValidator />
 
         <div class="d-flex row justify-content-center">
             <div class="card col-lg-8 col-xl-5 mb-4">
                 <div class="card-body">
                     <div class="mb-3">
-                        <InputText class="form-control" placeholder="タイトル" @bind-Value="@TodoData.Title" />
+                        <InputText
+                            class="form-control"
+                            placeholder="タイトル"
+                            @bind-Value="@TodoData.Title"
+                        />
                         <div class="mt-1">
                             <ValidationMessage For="@(() => TodoData.Title)" />
                         </div>
                     </div>
                     <div class="mb-3">
-                        <InputTextArea class="form-control" placeholder="説明" @bind-Value="@TodoData.Description" />
+                        <InputTextArea
+                            class="form-control"
+                            placeholder="説明"
+                            @bind-Value="@TodoData.Description"
+                        />
                         <div class="mt-1">
                             <ValidationMessage For="@(() => TodoData.Description)" />
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <InputDate class="form-control" placeholder="開始日" @bind-Value="@TodoData.BeginDateTime" />
+                            <InputDate
+                                class="form-control"
+                                placeholder="開始日"
+                                @bind-Value="@TodoData.BeginDateTime"
+                            />
                         </div>
                         <div class="col-md-6">
-                            <InputDate class="form-control" placeholder="終了日" @bind-Value="@TodoData.DueDateTime" />
+                            <InputDate
+                                class="form-control"
+                                placeholder="終了日"
+                                @bind-Value="@TodoData.DueDateTime"
+                             />
                         </div>
                         <div class="mt-1">
                             <ValidationMessage For="@(() => TodoData.DueDateTime)" />
@@ -43,18 +59,31 @@
 
                     <div class="d-flex">
                         <div class="flex-grow-1">
-                            <button type="submit" class="btn btn-primary" disabled="@(!EditContext.Validate())">
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                                disabled="@(!EditContext.Validate())"
+                            >
                                 @(TodoData.Id == new Guid() ? "作成" : "更新")
                             </button>
 
-                            <button type="button" class="btn btn-secondary ms-2" @onclick="OnClickReset">
+                            <button
+                                type="button"
+                                class="btn btn-secondary ms-2"
+                                @onclick="OnClickReset"
+                            >
                                 @(TodoData.Id == new Guid() ? "リセット" : "キャンセル")
                             </button>
                         </div>
+
                         @if (TodoData.Id != new Guid())
                         {
                             <div>
-                                <button type="button" class="btn btn-danger" @onclick="@(() => OnClickDelete(TodoData.Id))">
+                                <button
+                                    type="button"
+                                    class="btn btn-danger"
+                                    @onclick=@(() => OnClickDelete(TodoData.Id))
+                                >
                                     削除
                                 </button>
                             </div>
@@ -66,16 +95,15 @@
     </EditForm>
 </AuthorizeView>
 
-@{
-    if (TodoItems == null)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else
-    {
-        <p>@(TodoItems.TotalItems) 個の項目が見つかりました。</p>
+@if (TodoItems == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>@(TodoItems.TotalItems) 個の項目が見つかりました。</p>
 
-        <table class="table">
+    <table class="table">
         <thead>
             <tr>
                 <th width="60%">タイトル</th>
@@ -85,48 +113,68 @@
                 <th>操作</th>
             </tr>
         </thead>
+
         <tbody>
-            @{
-                    foreach (var item in TodoItems.Results)
-                    {
-                        <tr class="align-middle">
-                            <td>@item.Title</td>
-                            <td class="d-none d-lg-table-cell">@item.BeginDateTime?.ToShortDateString()</td>
-                            <td class="d-none d-lg-table-cell">@item.DueDateTime?.ToShortDateString()</td>
-                            <td>
-                                <span class="dropdown-toggle badge @GetTodoBgClass(item.State)" role="button" id="dropdownMenuLink"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                                    @item.State.DisplayValue
-                                </span>
+        @foreach (var item in TodoItems.Results)
+        {
+            <tr class="align-middle">
+                <td>@item.Title</td>
+                <td class="d-none d-lg-table-cell">
+                    @item.BeginDateTime?.ToShortDateString()
+                </td>
+                <td class="d-none d-lg-table-cell">
+                    @item.DueDateTime?.ToShortDateString()
+                </td>
+                <td>
+                    <span
+                        class="dropdown-toggle badge @GetTodoBgClass(item.State)"
+                        role="button"
+                        id="dropdownMenuLink"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                    >
+                        @item.State.DisplayValue
+                    </span>
 
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                    <li class="@(GetDropdownClass(item, TodoState.Todo))" role="button"
-                                @onclick="@(() => OnClickChangeState(item, TodoState.Todo))">
-                                        Todoに切り替え
-                                    </li>
-                                    <li class="@(GetDropdownClass(item, TodoState.Doing))" role="button"
-                                @onclick="@(() => OnClickChangeState(item, TodoState.Doing))">
-                                        Doingに切り替え
-                                    </li>
-                                    <li class="@(GetDropdownClass(item, TodoState.Done))" role="button"
-                                @onclick="@(() => OnClickChangeState(item, TodoState.Done))">
-                                        Doneに切り替え
-                                    </li>
-                                </ul>
-                            </td>
-                            <td>
-                                <button type="button" class="btn btn-primary btn-sm" @onclick="@(() => OnClickEdit(item))">
-                                    編集
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <li
+                            class="@(GetDropdownClass(item, TodoState.Todo))"
+                            role="button"
+                            @onclick=@(() => OnClickChangeState(item, TodoState.Todo))
+                        >
+                            Todoに切り替え
+                        </li>
+                        <li
+                            class="@(GetDropdownClass(item, TodoState.Doing))"
+                            role="button"
+                            @onclick=@(() => OnClickChangeState(item, TodoState.Doing))
+                        >
+                            Doingに切り替え
+                        </li>
+                        <li
+                            class="@(GetDropdownClass(item, TodoState.Done))"
+                            role="button"
+                            @onclick=@(() => OnClickChangeState(item, TodoState.Done))
+                        >
+                            Doneに切り替え
+                        </li>
+                    </ul>
+                </td>
+                <td>
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        @onclick=@(() => OnClickEdit(item))
+                    >
+                        編集
+                    </button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
 
-        <PaginationLink Items="@TodoItems" />
-    }
+    <PaginationLink Items="@TodoItems" />
 }
 
 @code {
