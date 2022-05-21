@@ -53,14 +53,17 @@ public class FetchTodoModel : MyComponentBase
 
         OnClickReset();
 
-        bool isParameterChanged = ParsePage(Page) != 1 || !string.IsNullOrEmpty(Q);
+        bool isParameterChanged = ParsePage(Page) != 1
+                                  || !string.IsNullOrEmpty(Q)
+                                  || !string.IsNullOrEmpty(State);
 
         if (isNewData && isParameterChanged)
             NavigationManager.NavigateTo(
                 NavigationManager.GetUriWithQueryParameters(
                     new Dictionary<string, object?> {
-                        {"page", null}, {"q", null}
-                    })
+                        {"page", null}, {"q", null}, {"state", null}
+                    }
+                )
             );
         else
             await OnParametersSetAsync();
