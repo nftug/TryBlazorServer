@@ -5,7 +5,11 @@
 
 <ul class="pagination justify-content-center">
     <li class="page-item @(Items.PreviousPage == null ? "disabled" : null)">
-        <a class="page-link" href="@(GetUriWithPage(Items.PreviousPage))" aria-label="Previous">
+        <a
+            class="page-link"
+            href="@(GetUriWithPage(Items.PreviousPage))"
+            aria-label="Previous"
+        >
             <span aria-hidden="true">&laquo;</span>
         </a>
     </li>
@@ -18,7 +22,11 @@
     }
 
     <li class="page-item @(Items.NextPage == null ? "disabled" : null)">
-        <a class="page-link" href="@(GetUriWithPage(Items.NextPage))" aria-label="Next">
+        <a
+            class="page-link"
+            href="@(GetUriWithPage(Items.NextPage))"
+            aria-label="Next"
+        >
             <span aria-hidden="true">&raquo;</span>
         </a>
     </li>
@@ -28,5 +36,6 @@
     [Parameter]
     public Pagination<T> Items { get; set; } = null!;
 
-    private string GetUriWithPage(int? page) => NavigationManager.GetUriWithQueryParameter("page", page);
+    private string GetUriWithPage(int? page)
+        => NavigationManager.GetUriWithQueryParameter("page", page);
 }
