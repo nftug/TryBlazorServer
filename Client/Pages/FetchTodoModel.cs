@@ -107,15 +107,17 @@ public class FetchTodoModel : MyComponentBase
         EditContext = new EditContext(TodoData);
     }
 
-    private int ParseIntParam(string? value, Func<int, int> func)
+    private int? ParseIntParam(string? value, Func<int, bool, int?> func)
     {
         int _value;
-        Int32.TryParse(value, out _value);
-        return func(_value);
+        bool canParse = Int32.TryParse(value, out _value);
+        return func(_value, canParse);
     }
 
-    private int ParsePage(string? value) => ParseIntParam(value, x => x > 0 ? x : 1);
+    private int? ParsePage(string? value)
+        => ParseIntParam(value, (x, _) => x > 0 ? x : 1);
 
     // TODO: あとで文字列でも検索できるようにする (QueryParameterから書き換える)
-    private int ParseState(string? value) => ParseIntParam(value, x => x);
+    private int? ParseState(string? value)
+        => ParseIntParam(value, (x, canParse) => canParse ? x : null);
 }
