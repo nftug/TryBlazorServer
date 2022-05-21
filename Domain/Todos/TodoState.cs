@@ -34,6 +34,6 @@ public class TodoState : ValueObject<TodoState>
 
     private DomainException CreateStateException(string message)
     {
-        return new DomainException("state", message);
+        return new DomainException("State", message);
     }
 }

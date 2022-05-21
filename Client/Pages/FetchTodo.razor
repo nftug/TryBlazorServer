@@ -1,94 +1,148 @@
 ﻿@page "/fetchtodo"
+@attribute [Authorize]
+@inherits FetchTodoModel
+
+@using Client.Components
+@using Domain.Todos
+@using Application.Todos
 
 <PageTitle>Todo List</PageTitle>
 
-@using MediatR
-@using Application.Todos
-@using Infrastructure.Todos
-@using Pagination.EntityFrameworkCore.Extensions
-@using Microsoft.AspNetCore.Http
-@using System.Security.Claims
-@inject IMediator Mediator
-@inject IHttpContextAccessor httpContextAccessor
-
 <h1>Todo List</h1>
 
-<p>This component demonstrates fetching data from a service.</p>
+<AuthorizeView Context="authContext">
+    <EditForm EditContext="@EditContext" OnValidSubmit="@OnValidSubmit" id="form">
+        <DataAnnotationsValidator />
 
-@if (todoItems == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <p>@(todoItems.TotalItems) items found.</p>
+        <div class="d-flex row justify-content-center">
+            <div class="card col-lg-8 col-xl-5 mb-3">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <InputText class="form-control" placeholder="タイトル" @bind-Value="@TodoData.Title" />
+                        <div class="mt-1">
+                            <ValidationMessage For="@(() => TodoData.Title)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <InputTextArea class="form-control" placeholder="説明" @bind-Value="@TodoData.Description" />
+                        <div class="mt-1">
+                            <ValidationMessage For="@(() => TodoData.Description)" />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <InputDate class="form-control" placeholder="開始日" @bind-Value="@TodoData.BeginDateTime" />
+                        </div>
+                        <div class="col-md-6">
+                            <InputDate class="form-control" placeholder="終了日" @bind-Value="@TodoData.DueDateTime" />
+                        </div>
+                        <div class="mt-1">
+                            <ValidationMessage For="@(() => TodoData.DueDateTime)" />
+                        </div>
+                    </div>
 
-    <table class="table">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Begin</th>
-            <th>Due</th>
-            <th>State</th>
-            <th>Created At</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in todoItems.Results)
-            {
-                <tr>
-                    <td>@item.Title</td>
-                    <td>@item.BeginDateTime</td>
-                    <td>@item.DueDateTime</td>
-                    <td>@item.State</td>
-                    <td>@item.CreatedDateTime.ToShortDateString()</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <button type="submit" class="btn btn-primary" disabled="@(!EditContext.Validate())">
+                                @(TodoData.Id == new Guid() ? "作成" : "更新")
+                            </button>
 
+                            <button type="button" class="btn btn-secondary ms-2" @onclick="OnClickReset">
+                                @(TodoData.Id == new Guid() ? "リセット" : "キャンセル")
+                            </button>
+                        </div>
+                        @if (TodoData.Id != new Guid())
+                        {
+                            <div>
+                                <button type="button" class="btn btn-danger" @onclick="@(() => OnClickDelete(TodoData.Id))">
+                                    削除
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+</AuthorizeView>
 
-    <ul class="pagination justify-content-center">
-        <li class="page-item @(todoItems.PreviousPage == null ? "disabled" : null)">
-            <a class="page-link" href="/fetchtodo?page=@todoItems.PreviousPage" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-            </a>
-        </li>
-        @{
-            foreach (int i in Enumerable.Range(1, todoItems.TotalPages))
-            {
-                <li class="page-item @(todoItems.CurrentPage == i ? "active" : null)">
-                    <a class="page-link" href="/fetchtodo?page=@i">@i</a>
-                </li>
-            }
-        }
-        <li class="page-item @(todoItems.NextPage == null ? "disabled" : null)">
-            <a class="page-link" href="/fetchtodo?page=@todoItems.NextPage" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-            </a>
-        </li>
-    </ul>
+@{
+    if (TodoItems == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <p>@(TodoItems.TotalItems) 個の項目が見つかりました。</p>
+
+        <table class="table">
+        <thead>
+            <tr>
+                <th width="60%">タイトル</th>
+                <th class="d-none d-lg-table-cell">開始</th>
+                <th class="d-none d-lg-table-cell">終了</th>
+                <th>状態</th>
+                <th width="5%"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                    foreach (var item in TodoItems.Results)
+                    {
+                        <tr class="align-middle">
+                            <td>@item.Title</td>
+                            <td class="d-none d-lg-table-cell">@item.BeginDateTime?.ToShortDateString()</td>
+                            <td class="d-none d-lg-table-cell">@item.DueDateTime?.ToShortDateString()</td>
+                            <td>
+                                <span class="dropdown-toggle badge @GetTodoBgClass(item.State)" role="button" id="dropdownMenuLink"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                                    @item.State.DisplayValue
+                                </span>
+
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                    <li class="@(GetDropdownClass(item, TodoState.Todo))" role="button"
+                                @onclick="@(() => OnClickChangeState(item, TodoState.Todo))">
+                                        Todoに切り替え
+                                    </li>
+                                    <li class="@(GetDropdownClass(item, TodoState.Doing))" role="button"
+                                @onclick="@(() => OnClickChangeState(item, TodoState.Doing))">
+                                        Doingに切り替え
+                                    </li>
+                                    <li class="@(GetDropdownClass(item, TodoState.Done))" role="button"
+                                @onclick="@(() => OnClickChangeState(item, TodoState.Done))">
+                                        Doneに切り替え
+                                    </li>
+                                </ul>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-sm" @onclick="@(() => OnClickEdit(item))">
+                                    編集
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        <PaginationLink Items="@TodoItems" />
+    }
 }
 
 @code {
-    [SupplyParameterFromQuery]
-    [Parameter]
-    public string Page { get; set; } = null!;
-
-    private string _userId =>
-    httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
-    ?? string.Empty;
-
-    private Pagination<TodoResultDTO>? todoItems = null;
-
-    private TodoQueryParameter _param = new TodoQueryParameter { Limit = 1 };
-
-    protected override async Task OnParametersSetAsync()
+    private string GetTodoBgClass(TodoState state)
     {
-        int page;
-        Int32.TryParse(Page, out page);
-        _param.Page = page > 0 ? page : 1;
+        if (state == TodoState.Doing) return "bg-secondary";
+        if (state == TodoState.Done) return "bg-success";
+        else return "bg-primary";
+    }
+    private string GetDropdownClass(TodoResultDTO item, TodoState state)
+    {
+        string ret = "dropdown-item";
 
-        todoItems = await Mediator.Send(new List.Query(_param, _userId));
+        if (item.State == state)
+            return $"{ret} disabled";
+        else
+            return ret;
     }
 }

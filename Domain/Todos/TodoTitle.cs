@@ -23,6 +23,6 @@ public class TodoTitle : ValueObject<TodoTitle>
 
     private DomainException CreateTitleException(string message)
     {
-        return new DomainException("title", message);
+        return new DomainException("Title", message);
     }
 }

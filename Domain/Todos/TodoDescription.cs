@@ -20,6 +20,6 @@ public class TodoDescription : ValueObject<TodoDescription>
 
     private DomainException CreateDescriptionException(string message)
     {
-        return new DomainException("description", message);
+        return new DomainException("Description", message);
     }
 }

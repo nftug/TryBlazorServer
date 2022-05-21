@@ -22,6 +22,6 @@ public class UserUserName : ValueObject<UserUserName>
 
     private DomainException CreateUserNameException(string message)
     {
-        return new DomainException("username", message);
+        return new DomainException("Username", message);
     }
 }

@@ -23,6 +23,6 @@ public class CommentContent : ValueObject<CommentContent>
 
     private DomainException CreateTitleException(string message)
     {
-        return new DomainException("content", message);
+        return new DomainException("Content", message);
     }
 }

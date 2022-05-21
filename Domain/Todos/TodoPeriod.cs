@@ -22,7 +22,7 @@ public class TodoPeriod : ValueObject<TodoPeriod>
 
     private DomainException CreatePeriodException(string message)
     {
-        return new DomainException("period", message);
+        return new DomainException(new string[] { "BeginDateTime", "DueDateTime" }, message);
     }
 
 }

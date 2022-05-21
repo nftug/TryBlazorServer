@@ -21,6 +21,6 @@ public class UserEmail : ValueObject<UserEmail>
 
     private DomainException CreateEmailException(string message)
     {
-        return new DomainException("email", message);
+        return new DomainException("Email", message);
     }
 }

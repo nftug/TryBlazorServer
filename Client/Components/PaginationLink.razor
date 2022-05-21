@@ -1,0 +1,32 @@
+@inject NavigationManager NavigationManager
+@typeparam T
+
+@using Pagination.EntityFrameworkCore.Extensions
+
+<ul class="pagination justify-content-center">
+    <li class="page-item @(Items.PreviousPage == null ? "disabled" : null)">
+        <a class="page-link" href="@(GetUriWithPage(Items.PreviousPage))" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+        </a>
+    </li>
+
+    @foreach (int i in Enumerable.Range(1, Items.TotalPages))
+    {
+        <li class="page-item @(Items.CurrentPage == i ? "active" : null)">
+            <a class="page-link" href="@(GetUriWithPage(i))">@i</a>
+        </li>
+    }
+
+    <li class="page-item @(Items.NextPage == null ? "disabled" : null)">
+        <a class="page-link" href="@(GetUriWithPage(Items.NextPage))" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+        </a>
+    </li>
+</ul>
+
+@code {
+    [Parameter]
+    public Pagination<T> Items { get; set; } = null!;
+
+    private string GetUriWithPage(int? page) => NavigationManager.GetUriWithQueryParameter("page", page);
+}
