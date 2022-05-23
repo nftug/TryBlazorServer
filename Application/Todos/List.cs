@@ -69,7 +69,6 @@ public class List
             var count = await filteredQuery.CountAsync();
 
             return new Pagination<TodoResultDTO>(results, count, page, limit);
-
         }
     }
 }

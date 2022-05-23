@@ -49,7 +49,7 @@ public class FetchTodoModel : MyComponentBase
         if (isNewData)
             await Mediator.Send(new Create.Command(TodoData, _userId));
         else
-            await Mediator.Send(new Edit.Command(TodoData.Id, TodoData, _userId, false));
+            await Mediator.Send(new Edit.Command(TodoData.Id, TodoData, _userId));
 
         OnClickReset();
 

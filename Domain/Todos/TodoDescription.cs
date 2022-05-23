@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Domain.Shared;
 
 namespace Domain.Todos;
@@ -6,20 +7,27 @@ public class TodoDescription : ValueObject<TodoDescription>
 {
     public string? Value { get; set; }
 
-    public const int MaxDescriptionLength = 140;
-
     public TodoDescription(string? value)
     {
-        if (value?.Length > MaxDescriptionLength)
-            throw CreateDescriptionException($"{MaxDescriptionLength}文字以内で入力してください");
-
         Value = value;
     }
 
     protected override bool EqualsCore(TodoDescription other) => Value == other.Value;
+}
 
-    private DomainException CreateDescriptionException(string message)
+public class TodoDescriptionAttribute : ValidationAttribute
+{
+    public const int MaxDescriptionLength = 140;
+
+    protected override ValidationResult? IsValid
+        (object? value, ValidationContext validationContext)
     {
-        return new DomainException("Description", message);
+        string? description = value as string;
+        string[] memberNames = new[] { validationContext.MemberName! };
+
+        if (description?.Length > MaxDescriptionLength)
+            return new ValidationResult($"{MaxDescriptionLength}文字以内で入力してください。", memberNames);
+
+        return ValidationResult.Success;
     }
 }

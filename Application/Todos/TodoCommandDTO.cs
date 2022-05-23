@@ -1,25 +1,18 @@
 using Domain.Todos;
-using Application.Shared;
 
 namespace Application.Todos;
 
-public class TodoCommandDTO : ValidatableDTOBase
+public class TodoCommandDTO
 {
     public Guid Id { get; set; }
-    public string? Title { get; set; } = null!;
+    [TodoTitleAttribute]
+    public string? Title { get; set; }
+    [TodoDescriptionAttribute]
     public string? Description { get; set; }
+    [TodoPeriodAttribute(Period.Begin, "DueDateTime")]
     public DateTime? BeginDateTime { get; set; }
+    [TodoPeriodAttribute(Period.Due, "BeginDateTime")]
     public DateTime? DueDateTime { get; set; }
+    [TodoStateAttribute]
     public int? State { get; set; }
-
-    protected override void AssertCanCreate()
-    {
-        Todo.CreateNew(
-            new TodoTitle(Title),
-            new TodoDescription(Description),
-            new TodoPeriod(BeginDateTime, DueDateTime),
-            new TodoState(State ?? 0),
-            string.Empty
-        );
-    }
 }
