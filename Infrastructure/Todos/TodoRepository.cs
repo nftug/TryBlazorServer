@@ -29,7 +29,7 @@ public class TodoRepository : ITodoRepository
         var foundTodoDataModel = await _context.Todo
                                                .Include(x => x.Comments)
                                                .FirstOrDefaultAsync(
-                                                   x => x.Id == todo.Id
+                                                    x => x.Id == todo.Id
                                                );
         if (foundTodoDataModel == null)
             throw new NotFoundException();
