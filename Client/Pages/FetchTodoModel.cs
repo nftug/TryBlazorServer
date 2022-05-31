@@ -85,7 +85,7 @@ public class FetchTodoModel : MyComponentBase
 
     protected async Task OnClickChangeState(TodoResultDTO item, TodoState state)
     {
-        TodoData = new TodoCommandDTO
+        var todo = new TodoCommandDTO
         {
             Id = item.Id,
             Title = item.Title,
@@ -94,7 +94,8 @@ public class FetchTodoModel : MyComponentBase
             DueDateTime = item.DueDateTime,
             State = state.Value
         };
-        await OnValidSubmit();
+        await Mediator.Send(new Edit.Command(todo.Id, todo, _userId));
+        await OnParametersSetAsync();
     }
 
     protected async Task OnClickDelete(Guid id)
