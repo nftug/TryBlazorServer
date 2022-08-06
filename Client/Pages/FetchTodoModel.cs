@@ -13,9 +13,11 @@ public class FetchTodoModel : MyComponentBase
     [SupplyParameterFromQuery]
     [Parameter]
     public string Page { get; set; } = null!;
+
     [SupplyParameterFromQuery]
     [Parameter]
     public string Q { get; set; } = null!;
+
     [SupplyParameterFromQuery]
     [Parameter]
     public string State { get; set; } = null!;
@@ -35,10 +37,13 @@ public class FetchTodoModel : MyComponentBase
         // ページ遷移時のバリデーションエラーの抑制
         EditContext = new EditContext(TodoData);
 
-        var param = new TodoQueryParameter { Limit = 10 };
-        param.Page = ParsePage(Page);
-        param.q = Q;
-        param.State = ParseState(State);
+        var param = new TodoQueryParameter
+        {
+            Limit = 10,
+            Page = ParsePage(Page),
+            q = Q,
+            State = ParseState(State)
+        };
 
         TodoItems = await Mediator.Send(new List.Query(param, _userId));
     }
@@ -53,18 +58,17 @@ public class FetchTodoModel : MyComponentBase
 
         OnClickReset();
 
-        bool isParameterChanged = ParsePage(Page) != 1
-                                  || !string.IsNullOrEmpty(Q)
-                                  || !string.IsNullOrEmpty(State);
+        bool isParameterChanged =
+            ParsePage(Page) != 1
+             || !string.IsNullOrEmpty(Q)
+             || !string.IsNullOrEmpty(State);
 
         if (isNewData && isParameterChanged)
             NavigationManager.NavigateTo(
                 NavigationManager.GetUriWithQueryParameters(
                     new Dictionary<string, object?> {
                         {"page", null}, {"q", null}, {"state", null}
-                    }
-                )
-            );
+                    }));
         else
             await OnParametersSetAsync();
     }
@@ -111,17 +115,16 @@ public class FetchTodoModel : MyComponentBase
         EditContext = new EditContext(TodoData);
     }
 
-    private int? ParseIntParam(string? value, Func<int, bool, int?> func)
+    private static int? ParseIntParam(string? value, Func<int, bool, int?> func)
     {
-        int _value;
-        bool canParse = Int32.TryParse(value, out _value);
+        bool canParse = int.TryParse(value, out int _value);
         return func(_value, canParse);
     }
 
-    private int? ParsePage(string? value)
+    private static int? ParsePage(string? value)
         => ParseIntParam(value, (x, _) => x > 0 ? x : 1);
 
     // TODO: あとで文字列でも検索できるようにする (QueryParameterから書き換える)
-    private int? ParseState(string? value)
+    private static int? ParseState(string? value)
         => ParseIntParam(value, (x, canParse) => canParse ? x : null);
 }

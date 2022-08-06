@@ -35,14 +35,17 @@ public class List
         public async Task<Pagination<TodoResultDTO>> Handle
             (Query request, CancellationToken cancellationToken)
         {
-            var filteredQuery = _todoQuerySearchService.GetFilteredQuery(request.Param)
-                                                       .OrderByDescending(x => x.CreatedDateTime);
+            var filteredQuery = _todoQuerySearchService
+                .GetFilteredQuery(request.Param)
+                .Where(x => x.OwnerUserId == request.UserId)
+                .OrderByDescending(x => x.CreatedDateTime);
             int page = (int)request.Param.Page!;
             int limit = (int)request.Param.Limit!;
 
             var paginatedQuery = filteredQuery.Skip((page - 1) * limit).Take(limit);
 
-            var results = await paginatedQuery.Select(
+            var results = await paginatedQuery
+                .Select(
                 x => new TodoResultDTO(
                     x.Id,
                     x.Title,
@@ -64,7 +67,8 @@ public class List
                     x.UpdatedDateTime,
                     x.OwnerUserId
                 )
-            ).ToListAsync();
+            )
+            .ToListAsync(cancellationToken);
 
             var count = await filteredQuery.CountAsync();
 

@@ -12,59 +12,58 @@
 <p>This component demonstrates fetching data from a service.</p>
 
 <AuthorizeView>
-    <p>Hello, @context.User.Identity?.Name!</p>
+  <p>Hello, @context.User.Identity?.Name!</p>
 </AuthorizeView>
 
 @if (forecasts == null)
 {
-    <p><em>Loading...</em></p>
+  <p><em>Loading...</em></p>
 }
 else
 {
-    <table class="table">
-    <thead>
+  <table class="table">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Temp. (C)</th>
+      <th>Temp. (F)</th>
+      <th>Summary</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var forecast in forecasts)
+      {
         <tr>
-            <th>Date</th>
-            <th>Temp. (C)</th>
-            <th>Temp. (F)</th>
-            <th>Summary</th>
+          <td>@forecast.Date.ToShortDateString()</td>
+          <td>@forecast.TemperatureC</td>
+          <td>@forecast.TemperatureF</td>
+          <td>@forecast.Summary</td>
         </tr>
-    </thead>
-    <tbody>
-        @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+      }
+    </tbody>
+  </table>
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
-    private Timer? _timer;
+  private WeatherForecast[]? forecasts;
+  private Timer? _timer;
 
-    protected override void OnInitialized()
-    {
-        _timer = new Timer((_) => GetForecast(), null, 0, 1000);
-    }
+  protected override void OnInitialized()
+  {
+    _timer = new Timer((_) => GetForecast(), null, 0, 1000);
+  }
 
-    private void GetForecast()
+  private void GetForecast()
+  {
+    InvokeAsync(async () =>
     {
-        InvokeAsync(async () =>
-        {
-            forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
-            StateHasChanged();
-        });
-    }
+      forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+      StateHasChanged();
+    });
+  }
 
-    public void Dispose()
-    {
-        if (_timer != null)
-            _timer.Dispose();
-    }
+  public void Dispose()
+  {
+    if (_timer != null) _timer.Dispose();
+  }
 }
