@@ -15,7 +15,7 @@
         @Item.EndDate?.ToShortDateString()
     </td>
     <td>
-        <span class="dropdown-toggle badge @GetTodoBgClass(Item.State)" role="button"
+        <span class="dropdown-toggle badge @TodoBgClass" role="button"
             id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
             @Item.State.DisplayValue
         </span>
@@ -53,17 +53,17 @@
     [Parameter]
     public EventCallback<(Guid, TodoState)> OnClickChangeState { get; set; }
 
-    private string GetTodoBgClass(TodoState state)
-        => state == TodoState.Doing
+    private string TodoBgClass
+        => Item.State == TodoState.Doing
             ? "bg-secondary"
-            : state == TodoState.Done
+            : Item.State == TodoState.Done
             ? "bg-success"
             : "bg-primary";
 
     private string GetDropdownClass(TodoState state)
-        => !IsOwnedByUser || Item?.State.Value == state.Value
+        => !IsOwnedByUser || Item.State.Value == state.Value
             ? "dropdown-item disabled"
             : "dropdown-item";
 
-    private bool IsOwnedByUser => Item?.OwnerUserId == UserInfo.Id;
+    private bool IsOwnedByUser => Item.OwnerUserId == UserInfo.Id;
 }

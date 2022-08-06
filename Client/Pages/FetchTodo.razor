@@ -33,11 +33,11 @@
     </thead>
 
     <tbody>
-    @foreach (var item in TodoItems.Results)
-    {
-        <TodoListItem Item="@item" OnClickEdit="@(item => ResultToCommand(item))"
-            OnClickChangeState="@(args => ChangeState(args.Item1, args.Item2))" />
-    }
+        @foreach (var item in TodoItems.Results)
+        {
+            <TodoListItem Item="@item" OnClickEdit="@(item => ResultToCommand(item))"
+                OnClickChangeState="@(args => ChangeState(args.Item1, args.Item2))" />
+        }
     </tbody>
 </table>
 
