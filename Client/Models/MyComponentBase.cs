@@ -1,6 +1,4 @@
-using System.Security.Claims;
 using Client.Data;
-using MediatR;
 using Microsoft.AspNetCore.Components;
 
 namespace Client.Models;
@@ -8,9 +6,8 @@ namespace Client.Models;
 public abstract class MyComponentBase : ComponentBase
 {
     [Inject]
-    protected IMediator Mediator { get; set; } = null!;
-    [Inject]
     protected UserInfoService UserInfo { get; set; } = null!;
+
     [Inject]
     protected NavigationManager NavigationManager { get; set; } = null!;
 

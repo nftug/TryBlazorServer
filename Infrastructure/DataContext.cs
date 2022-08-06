@@ -10,7 +10,7 @@ public class DataContext : IdentityDbContext<UserDataModel<Guid>, IdentityRole<G
     public DataContext(DbContextOptions<DataContext> options)
         : base(options)
     {
-        // ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+        ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
     }
 
     public DbSet<TodoDataModel> Todo { get; set; } = null!;

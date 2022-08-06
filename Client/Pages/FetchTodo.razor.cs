@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Components;
 using Pagination.EntityFrameworkCore.Extensions;
-using Microsoft.AspNetCore.Components.Forms;
 using Application.Todos.Models;
 using Domain.Todos.Queries;
 using Client.Data;
 using Domain.Todos.ValueObjects;
 using Client.Models;
+using Client.Components;
 
 namespace Client.Pages;
 
@@ -28,24 +28,17 @@ public partial class FetchTodo : MyComponentBase
 
     protected TodoCommandDTO TodoCommand { get; set; } = new TodoCommandDTO();
     protected Pagination<TodoResultDTO>? TodoItems { get; set; } = null;
-    protected EditContext EditContext = null!;
+    protected TodoForm? TodoForm { get; set; } = null!;
 
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
     {
-        EditContext = new EditContext(TodoCommand);
-        base.OnInitialized();
+        FetchData();
     }
 
-    protected override async Task OnParametersSetAsync()
-    {
-        await FetchData();
-        await base.OnParametersSetAsync();
-    }
-
-    protected async Task FetchData()
+    protected void FetchData()
     {
         // 画面更新時のバリデーションエラー抑制
-        EditContext = new EditContext(TodoCommand);
+        // EditContext = new EditContext(Command);
 
         var param = new TodoQueryParameter
         {
@@ -55,7 +48,7 @@ public partial class FetchTodo : MyComponentBase
             State = ParseState(State)
         };
 
-        await InvokeAsync(async () =>
+        InvokeAsync(async () =>
         {
             TodoItems = await TodoService.GetList(param);
             StateHasChanged();
@@ -65,15 +58,7 @@ public partial class FetchTodo : MyComponentBase
     protected void ResultToCommand(TodoResultDTO item)
     {
         TodoCommand = TodoService.ResultToCommand(item);
-        EditContext = new EditContext(TodoCommand);
     }
-
-    protected void ResetForm()
-    {
-        TodoCommand = new TodoCommandDTO();
-        EditContext = new EditContext(TodoCommand);
-    }
-
 
     protected async Task OnValidSubmit()
     {
@@ -83,34 +68,33 @@ public partial class FetchTodo : MyComponentBase
         else
             await TodoService.Put((Guid)TodoCommand.Id!, TodoCommand);
 
-        ResetForm();
+        TodoForm?.ResetForm();
 
         bool isParameterChanged =
             ParsePage(Page) != 1
              || !string.IsNullOrEmpty(Q)
              || !string.IsNullOrEmpty(State);
 
-        if (isNewData && isParameterChanged)
+        if (isNewData || isParameterChanged)
             NavigationManager.NavigateTo(
                 NavigationManager.GetUriWithQueryParameters(
                     new Dictionary<string, object?> {
                         {"page", null}, {"q", null}, {"state", null}
                     }));
         else
-            await FetchData();
+            FetchData();
     }
 
     protected async Task ChangeState(Guid id, TodoState state)
     {
         await TodoService.ChangeState(id, state);
-        await FetchData();
+        FetchData();
     }
 
     protected async Task Delete(Guid id)
     {
         await TodoService.Delete(id);
-        await FetchData();
-        ResetForm();
+        FetchData();
     }
 
     // TODO: あとで文字列でも検索できるようにする (QueryParameterから書き換える)

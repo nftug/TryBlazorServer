@@ -10,63 +10,8 @@
 
 <h1>Todo List</h1>
 
-<EditForm EditContext="@EditContext" OnValidSubmit="@OnValidSubmit">
-    <DataAnnotationsValidator />
-
-    <div class="d-flex row justify-content-center">
-        <div class="card col-lg-8 col-xl-5 mb-4">
-            <div class="card-body">
-                <div class="mb-3">
-                    <InputText class="form-control" placeholder="タイトル" @bind-Value="@TodoCommand.Title" />
-                    <div class="mt-1">
-                        <ValidationMessage For="@(() => TodoCommand.Title)" />
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <InputTextArea class="form-control" placeholder="説明" @bind-Value="@TodoCommand.Description" />
-                    <div class="mt-1">
-                        <ValidationMessage For="@(() => TodoCommand.Description)" />
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <InputDate class="form-control" placeholder="開始日" @bind-Value="@TodoCommand.StartDate" />
-                        <div class="mt-1">
-                            <ValidationMessage For="@(() => TodoCommand.StartDate)" />
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <InputDate class="form-control" placeholder="終了日" @bind-Value="@TodoCommand.EndDate" />
-                        <div class="mt-1">
-                            <ValidationMessage For="@(() => TodoCommand.EndDate)" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-flex">
-                    <div class="flex-grow-1">
-                        <button type="submit" class="btn btn-primary" disabled="@(!EditContext.Validate())">
-                            @(TodoCommand.Id == null ? "作成" : "更新")
-                        </button>
-
-                        <button type="button" class="btn btn-secondary ms-2" @onclick="ResetForm">
-                            @(TodoCommand.Id == null ? "リセット" : "キャンセル")
-                        </button>
-                    </div>
-
-                    @if (TodoCommand.Id != null)
-                    {
-                        <div>
-                            <button type="button" class="btn btn-danger" @onclick=@(() => Delete((Guid)TodoCommand.Id!))>
-                                削除
-                            </button>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-</EditForm>
+<TodoForm @ref="@TodoForm" @bind-Command="@TodoCommand"
+    OnValidSubmit="@OnValidSubmit" OnDelete="@((id) => Delete(id))" />
 
 @if (TodoItems == null)
 {
@@ -88,11 +33,11 @@
     </thead>
 
     <tbody>
-        @foreach (var item in TodoItems.Results)
-        {
-            <TodoListItem Item="@item" OnClickEdit="@(item => ResultToCommand(item))"
+    @foreach (var item in TodoItems.Results)
+    {
+        <TodoListItem Item="@item" OnClickEdit="@(item => ResultToCommand(item))"
             OnClickChangeState="@(args => ChangeState(args.Item1, args.Item2))" />
-        }
+    }
     </tbody>
 </table>
 
