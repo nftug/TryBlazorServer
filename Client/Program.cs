@@ -1,56 +1,30 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.EntityFrameworkCore;
 using Client.Areas.Identity;
 using Client.Data;
 using Infrastructure;
-using Application.Todos;
-using Domain.Todos;
-using Domain.Comments;
-using Domain.Users;
-using Infrastructure.Todos;
-using Infrastructure.Comments;
-using Infrastructure.Users;
 using Infrastructure.DataModels;
-using MediatR;
+using Client.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-/* builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>(); */
+IConfiguration config = builder.Configuration;
+builder.Services.AddApplicationServices(config);
 
-builder.Services.AddDefaultIdentity<UserDataModel>(opt =>
+builder.Services.AddDefaultIdentity<UserDataModel<Guid>>(opt =>
             opt.SignIn.RequireConfirmedAccount = true
-        ).AddEntityFrameworkStores<ApplicationDbContext>();
+        ).AddEntityFrameworkStores<DataContext>();
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<UserDataModel>>();
+builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<UserDataModel<Guid>>>();
 
 builder.Services.AddHttpContextAccessor();
 
-// MediatR
-builder.Services.AddMediatR(typeof(List.Query).Assembly);
-
-// repositories
-builder.Services.AddTransient<ITodoRepository, TodoRepository>();
-builder.Services.AddTransient<ICommentRepository, CommentRepository>();
-builder.Services.AddTransient<IUserRepository, UserRepository>();
-
-// query services
-builder.Services.AddTransient<TodoQuerySearchService>();
-builder.Services.AddTransient<CommentQuerySearchService>();
-
+builder.Services.AddScoped<UserInfoService>();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<CountIncrementService>();
+builder.Services.AddScoped<TodoService>();
 
 var app = builder.Build();
 

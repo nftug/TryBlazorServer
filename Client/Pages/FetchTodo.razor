@@ -1,101 +1,99 @@
 ﻿@page "/fetchtodo"
 @attribute [Authorize]
-@inherits FetchTodoModel
+@inherits MyComponentBase
 
+@using Client.Models
 @using Client.Components
-@using Domain.Todos
-@using Application.Todos
+@using Application.Todos.Models
 
 <PageTitle>Todo List</PageTitle>
 
 <h1>Todo List</h1>
 
-<AuthorizeView Context="authContext">
-  <EditForm EditContext="@EditContext" OnValidSubmit="@OnValidSubmit">
+<EditForm EditContext="@EditContext" OnValidSubmit="@OnValidSubmit">
     <DataAnnotationsValidator />
 
     <div class="d-flex row justify-content-center">
-      <div class="card col-lg-8 col-xl-5 mb-4">
-        <div class="card-body">
-          <div class="mb-3">
-            <InputText class="form-control" placeholder="タイトル" @bind-Value="@TodoData.Title" />
-            <div class="mt-1">
-              <ValidationMessage For="@(() => TodoData.Title)" />
-            </div>
-          </div>
-          <div class="mb-3">
-            <InputTextArea class="form-control" placeholder="説明" @bind-Value="@TodoData.Description" />
-            <div class="mt-1">
-              <ValidationMessage For="@(() => TodoData.Description)" />
-            </div>
-          </div>
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <InputDate class="form-control" placeholder="開始日" @bind-Value="@TodoData.BeginDateTime" />
-              <div class="mt-1">
-                <ValidationMessage For="@(() => TodoData.BeginDateTime)" />
-              </div>
-            </div>
-            <div class="col-md-6">
-              <InputDate class="form-control" placeholder="終了日" @bind-Value="@TodoData.DueDateTime" />
-              <div class="mt-1">
-                <ValidationMessage For="@(() => TodoData.DueDateTime)" />
-              </div>
-            </div>
-          </div>
+        <div class="card col-lg-8 col-xl-5 mb-4">
+            <div class="card-body">
+                <div class="mb-3">
+                    <InputText class="form-control" placeholder="タイトル" @bind-Value="@TodoCommand.Title" />
+                    <div class="mt-1">
+                        <ValidationMessage For="@(() => TodoCommand.Title)" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <InputTextArea class="form-control" placeholder="説明" @bind-Value="@TodoCommand.Description" />
+                    <div class="mt-1">
+                        <ValidationMessage For="@(() => TodoCommand.Description)" />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <InputDate class="form-control" placeholder="開始日" @bind-Value="@TodoCommand.StartDate" />
+                        <div class="mt-1">
+                            <ValidationMessage For="@(() => TodoCommand.StartDate)" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <InputDate class="form-control" placeholder="終了日" @bind-Value="@TodoCommand.EndDate" />
+                        <div class="mt-1">
+                            <ValidationMessage For="@(() => TodoCommand.EndDate)" />
+                        </div>
+                    </div>
+                </div>
 
-          <div class="d-flex">
-            <div class="flex-grow-1">
-              <button type="submit" class="btn btn-primary" disabled="@(!EditContext.Validate())">
-                @(TodoData.Id == new Guid() ? "作成" : "更新")
-              </button>
+                <div class="d-flex">
+                    <div class="flex-grow-1">
+                        <button type="submit" class="btn btn-primary" disabled="@(!EditContext.Validate())">
+                            @(TodoCommand.Id == null ? "作成" : "更新")
+                        </button>
 
-              <button type="button" class="btn btn-secondary ms-2" @onclick="OnClickReset">
-                @(TodoData.Id == new Guid() ? "リセット" : "キャンセル")
-              </button>
+                        <button type="button" class="btn btn-secondary ms-2" @onclick="ResetForm">
+                            @(TodoCommand.Id == null ? "リセット" : "キャンセル")
+                        </button>
+                    </div>
+
+                    @if (TodoCommand.Id != null)
+                    {
+                        <div>
+                            <button type="button" class="btn btn-danger" @onclick=@(() => Delete((Guid)TodoCommand.Id!))>
+                                削除
+                            </button>
+                        </div>
+                    }
+                </div>
             </div>
-
-            @if (TodoData.Id != new Guid())
-            {
-              <div>
-                <button type="button" class="btn btn-danger" @onclick=@(() => OnClickDelete(TodoData.Id))>
-                  削除
-                </button>
-              </div>
-            }
-          </div>
         </div>
-      </div>
     </div>
-  </EditForm>
-</AuthorizeView>
+</EditForm>
 
 @if (TodoItems == null)
 {
-  <p><em>Loading...</em></p>
-  return;
+    <p><em>Loading...</em></p>
+    return;
 }
 
 <p>@(TodoItems.TotalItems) 個の項目が見つかりました。</p>
 
 <table class="table">
-  <thead>
-    <tr>
-      <th width="60%">タイトル</th>
-      <th class="d-none d-lg-table-cell">開始</th>
-      <th class="d-none d-lg-table-cell">終了</th>
-      <th>状態</th>
-      <th>操作</th>
-    </tr>
-  </thead>
+    <thead>
+        <tr>
+            <th width="60%">タイトル</th>
+            <th class="d-none d-lg-table-cell">開始</th>
+            <th class="d-none d-lg-table-cell">終了</th>
+            <th>状態</th>
+            <th>操作</th>
+        </tr>
+    </thead>
 
-  <tbody>
-    @foreach (var item in TodoItems.Results)
-    {
-      <TodoListItem Item="@item" OnClickEdit="@(item => OnClickEdit(item))"
-      OnClickChangeState="@(args => OnClickChangeState(args.Item1, args.Item2))" />
-    }
-  </tbody>
+    <tbody>
+        @foreach (var item in TodoItems.Results)
+        {
+            <TodoListItem Item="@item" OnClickEdit="@(item => ResultToCommand(item))"
+            OnClickChangeState="@(args => ChangeState(args.Item1, args.Item2))" />
+        }
+    </tbody>
 </table>
 
 <PaginationLink Items="@TodoItems" />

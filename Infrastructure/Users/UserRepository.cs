@@ -1,65 +1,31 @@
-using Domain.Users;
-using Domain.Shared;
 using Infrastructure.DataModels;
+using Domain.Users.Entities;
+using Infrastructure.Shared.Services.Repository;
+using Infrastructure.Shared.Specifications.DataSource;
 
 namespace Infrastructure.Users;
 
-public class UserRepository : IUserRepository
+public class UserRepository : RepositoryBase<User>
 {
-    private readonly ApplicationDbContext _context;
-
-    public UserRepository(ApplicationDbContext context)
+    public UserRepository(DataContext context) : base(context)
     {
-        _context = context;
     }
 
-    public async Task<User> UpdateAsync(User user)
-    {
-        var foundUserDataModel = await _context.Users.FindAsync(user.Id);
+    protected override IDataSourceSpecification<User> DataSource
+        => new UserDataSourceSpecification(_context);
 
-        if (foundUserDataModel == null)
-            throw new NotFoundException();
+    protected override async Task AddEntityAsync(IDataModel<User> entity)
+        => await _context.Users.AddAsync((UserDataModel<Guid>)entity);
 
-        var userDataModel = Transfer(user, foundUserDataModel);
+    protected override void UpdateEntity(IDataModel<User> entity)
+        => _context.Users.Update((UserDataModel<Guid>)entity);
 
-        _context.Users.Update(userDataModel);
-        await _context.SaveChangesAsync();
+    protected override void RemoveEntity(IDataModel<User> entity)
+        => _context.Users.Remove((UserDataModel<Guid>)entity);
 
-        return ToModel(userDataModel);
-    }
+    protected override IDataModel<User> ToDataModel(User origin)
+        => new UserDataModel<Guid>(origin);
 
-    private UserDataModel Transfer(User user, UserDataModel userDataModel)
-    {
-        userDataModel.UserName = user.UserName.Value;
-        userDataModel.Email = user.Email.Value;
-
-        return userDataModel;
-    }
-
-    public async Task<User?> FindAsync(string id)
-    {
-        var UserDataModel = await _context.Users.FindAsync(id);
-
-        return UserDataModel != null ? ToModel(UserDataModel) : null;
-    }
-
-    private User ToModel(UserDataModel userDataModel)
-    {
-        return new User(
-            id: userDataModel.Id,
-            userName: new UserName(userDataModel.UserName),
-            email: new UserEmail(userDataModel.Email)
-        );
-    }
-
-    public async Task RemoveAsync(string id)
-    {
-        var userDataModel = await _context.Users.FindAsync(id);
-
-        if (userDataModel == null)
-            throw new NotFoundException();
-
-        _context.Users.Remove(userDataModel);
-        await _context.SaveChangesAsync();
-    }
+    protected override void Transfer(User origin, IDataModel<User> dataModel)
+        => ((UserDataModel<Guid>)dataModel).Transfer(origin);
 }

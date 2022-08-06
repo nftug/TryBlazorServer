@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Infrastructure.DataModels
 @attribute [IgnoreAntiforgeryToken]
-@inject SignInManager<UserDataModel> SignInManager
+@inject SignInManager<UserDataModel<Guid>> SignInManager
 @functions {
     public async Task<IActionResult> OnPost()
     {
