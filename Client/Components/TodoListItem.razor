@@ -4,7 +4,7 @@
 @using Client.Models
 @using Client.Data
 
-@inject UserInfoService UserInfo
+@inherits MyComponentBase
 
 <tr class="align-middle">
     <td>@Item.Title</td>
@@ -21,22 +21,22 @@
         </span>
 
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-            <li class="@(GetDropdownClass(TodoState.Todo))" role="button"
+            <li class=@(GetDropdownClass(TodoState.Todo)) role="button"
                 @onclick=@(async () => await OnClickChangeState.InvokeAsync((Item.Id, TodoState.Todo)))>
                 Todoに切り替え
             </li>
-            <li class="@(GetDropdownClass(TodoState.Doing))" role="button"
+            <li class=@(GetDropdownClass(TodoState.Doing)) role="button"
                 @onclick=@(async () => await OnClickChangeState.InvokeAsync((Item.Id, TodoState.Doing)))>
                 Doingに切り替え
             </li>
-            <li class="@(GetDropdownClass(TodoState.Done))" role="button"
+            <li class=@(GetDropdownClass(TodoState.Done)) role="button"
                 @onclick=@(async () => await OnClickChangeState.InvokeAsync((Item.Id, TodoState.Done)))>
                 Doneに切り替え
             </li>
         </ul>
     </td>
     <td>
-        <button type="button" class="btn btn-primary btn-sm" disabled="@(!IsOwnedByUser)"
+        <button type="button" class="btn btn-primary btn-sm" disabled=@(!IsOwnedByUser)
             @onclick=@(async () => await OnClickEdit.InvokeAsync(Item))>
             <span class="oi oi-pencil" aria-hidden="true"></span>
         </button>
@@ -46,10 +46,8 @@
 @code {
     [Parameter]
     public TodoResultDTO Item { get; set; } = null!;
-
     [Parameter]
     public EventCallback<TodoResultDTO> OnClickEdit { get; set; }
-
     [Parameter]
     public EventCallback<(Guid, TodoState)> OnClickChangeState { get; set; }
 

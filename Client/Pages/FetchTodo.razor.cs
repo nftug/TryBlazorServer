@@ -12,23 +12,22 @@ namespace Client.Pages;
 public partial class FetchTodo : MyComponentBase
 {
     [Inject]
-    protected TodoService TodoService { get; set; } = null!;
+    private TodoService TodoService { get; set; } = null!;
 
     [SupplyParameterFromQuery]
     [Parameter]
     public string Page { get; set; } = null!;
-
     [SupplyParameterFromQuery]
     [Parameter]
     public string Q { get; set; } = null!;
-
     [SupplyParameterFromQuery]
     [Parameter]
     public string State { get; set; } = null!;
 
-    protected TodoCommandDTO TodoCommand { get; set; } = new TodoCommandDTO();
-    protected Pagination<TodoResultDTO>? TodoItems { get; set; } = null;
-    protected TodoForm? TodoForm { get; set; } = null!;
+    private TodoCommandDTO TodoCommand { get; set; } = new TodoCommandDTO();
+    private Pagination<TodoResultDTO>? TodoItems { get; set; } = null;
+    private TodoForm? TodoForm { get; set; } = null!;
+    private bool IsLoading { get; set; }
 
     protected override void OnParametersSet()
     {
@@ -37,9 +36,6 @@ public partial class FetchTodo : MyComponentBase
 
     protected void FetchData()
     {
-        // 画面更新時のバリデーションエラー抑制
-        // EditContext = new EditContext(Command);
-
         var param = new TodoQueryParameter
         {
             Limit = 10,
@@ -50,7 +46,12 @@ public partial class FetchTodo : MyComponentBase
 
         InvokeAsync(async () =>
         {
+            IsLoading = true;
+            // await Task.Delay(500);
+
             TodoItems = await TodoService.GetList(param);
+
+            IsLoading = false;
             StateHasChanged();
         });
     }
@@ -75,7 +76,7 @@ public partial class FetchTodo : MyComponentBase
              || !string.IsNullOrEmpty(Q)
              || !string.IsNullOrEmpty(State);
 
-        if (isNewData || isParameterChanged)
+        if (isParameterChanged)
             NavigationManager.NavigateTo(
                 NavigationManager.GetUriWithQueryParameters(
                     new Dictionary<string, object?> {

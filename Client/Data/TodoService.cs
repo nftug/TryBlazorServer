@@ -50,7 +50,7 @@ public class TodoService
 
     public async Task<TodoResultDTO> ChangeState(Guid id, TodoState state)
     {
-        var command = new TodoCommandDTO { State = state.Value };
-        return await Patch(id, command);
+        var command = new TodoStateCommand { State = state.Value };
+        return await _mediator.Send(new EditState.Command(id, command, _userInfo.Id, EditMode.Patch));
     }
 }

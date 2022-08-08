@@ -10,10 +10,10 @@
 
 <h1>Todo List</h1>
 
-<TodoForm @ref="@TodoForm" @bind-Command="@TodoCommand"
-    OnValidSubmit="@OnValidSubmit" OnDelete="@((id) => Delete(id))" />
+<TodoForm @ref=@TodoForm @bind-Command=@TodoCommand
+    OnValidSubmit=@OnValidSubmit OnDelete=@((id) => Delete(id)) />
 
-@if (TodoItems == null)
+@if (IsLoading || TodoItems == null)
 {
     <p><em>Loading...</em></p>
     return;
@@ -35,8 +35,8 @@
     <tbody>
         @foreach (var item in TodoItems.Results)
         {
-            <TodoListItem Item="@item" OnClickEdit="@(item => ResultToCommand(item))"
-                OnClickChangeState="@(args => ChangeState(args.Item1, args.Item2))" />
+            <TodoListItem Item=@item OnClickEdit=@(item => ResultToCommand(item))
+                OnClickChangeState=@(args => ChangeState(args.Item1, args.Item2)) />
         }
     </tbody>
 </table>

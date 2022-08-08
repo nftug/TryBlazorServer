@@ -9,16 +9,12 @@ public partial class TodoForm : MyComponentBase
 {
     [Parameter]
     public TodoCommandDTO Command { get; set; } = null!;
-
     [Parameter]
     public EventCallback<TodoCommandDTO> CommandChanged { get; set; }
-
     [Parameter]
     public EventCallback<EditContext> OnValidSubmit { get; set; }
-
     [Parameter]
-    public EventCallback? OnResetForm { get; set; }
-
+    public EventCallback OnResetForm { get; set; }
     [Parameter]
     public EventCallback<Guid> OnDelete { get; set; }
 
@@ -57,8 +53,6 @@ public partial class TodoForm : MyComponentBase
     private async Task OnResetFormHandler()
     {
         ResetForm();
-
-        if (OnResetForm.HasValue)
-            await ((EventCallback)OnResetForm).InvokeAsync();
+        await OnResetForm.InvokeAsync();
     }
 }

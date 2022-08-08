@@ -7,7 +7,6 @@ public abstract class MyComponentBase : ComponentBase
 {
     [Inject]
     protected UserInfoService UserInfo { get; set; } = null!;
-
     [Inject]
     protected NavigationManager NavigationManager { get; set; } = null!;
 
